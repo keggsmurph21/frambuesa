@@ -1,0 +1,23 @@
+{
+  "name": "frambuesa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"tests\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keggsmurph21/frambuesa.git"
+  },
+  "author": "Kevin Murphy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/keggsmurph21/frambuesa/issues"
+  },
+  "homepage": "https://github.com/keggsmurph21/frambuesa#readme",
+  "dependencies": {
+    "request": "^2.87.0",
+    "ssh2": "^0.6.1"
+  }
+}
