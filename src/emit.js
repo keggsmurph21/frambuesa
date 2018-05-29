@@ -22,6 +22,8 @@ function emit(title, body) {
       console.error(`EMIT> ERR: ${err}`);
     } else {
       console.info(`EMIT> POST: RESPONSE: ${res.statusCode}`);
+      if (res.statusCode === '400')
+        emit('ERROR', 'Unable emit full response');
     }
 
   });

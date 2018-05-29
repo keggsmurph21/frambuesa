@@ -108,7 +108,7 @@ module.exports = {
   },
 
   logs: () => {
-    emit('LOGS', logs.slice(-25));
+    emit('LOGS', logs.slice(-10));
   }
 
 }
