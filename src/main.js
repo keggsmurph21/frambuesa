@@ -12,11 +12,11 @@ const URL = `http://${HOST}:${PORT}/bot/queue`;
 function poll() {
   console.log(`polling ${URL} ${(new Date()).getTime()}`);
   request.get(URL, (err, res, body) => {
-    
+
     if (err) {
       console.error(err);
     } else {
-      parse(JSON.parse(body));
+      parse(body);
     }
 
     setTimeout(poll, 1000);

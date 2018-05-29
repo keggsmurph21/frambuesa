@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/keggsmurph21/frambuesa#readme",
   "dependencies": {
+    "cvlc": "^0.1.0",
     "request": "^2.87.0",
     "ssh2": "^0.6.1"
   }
