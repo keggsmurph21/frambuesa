@@ -1,20 +1,29 @@
 'use strict';
 
 const request = require('request');
+const fs = require('fs');
 
 const ssh = require('./ssh');
 const parse = require('./parse');
 
-const HOST = process.env.HOST;
-const PORT = process.env.PORT;
-const URL = `http://${HOST}:${PORT}/bot/queue`;
+const cfg = require('./config');
+
+if (!fs.existsSync('./tmp'))
+  fs.mkdirSync('./tmp', (err) => {
+    if (err) throw err;
+  });
+
+if (!fs.existsSync('./logs'))
+  fs.mkdirSync('./logs', (err) => {
+    if (err) throw err;
+  });
 
 function poll() {
-  console.log(`polling ${URL} ${(new Date()).getTime()}`);
-  request.get(URL, (err, res, body) => {
+  console.log(`F> polling ${cfg.bot_queue_url} ${(new Date()).getTime()}`);
+  request.get(cfg.bot_queue_url, (err, res, body) => {
 
     if (err) {
-      console.error(err);
+      console.error(`F> polling ERR: ${err}`);
     } else {
       parse(body);
     }

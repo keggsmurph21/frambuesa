@@ -1,52 +1,102 @@
 'use strict';
 
-const child = require('child_process');
+const exec = require('child_process').exec;
+const path = require('path');
+const fs = require('fs');
 
-let playing = false;
-let current = 0;
-let queue = [];
+const cfg = require('./config');
+const emit = require('./emit');
+
+const socket = cfg.vlc_socket;
+
+function send(message, callback) {
+  while (!fs.existsSync(socket)) { }
+
+  console.log(`SOCKET> echo ${message} | nc -U ${socket}`);
+  exec(`echo ${message} | nc -U ${socket}`, (err, stdout, stderr) => {
+    if (err)
+      setTimeout(() => { send(message, callback); }, 1000);
+
+    if (callback) {
+      callback(stdout, stderr);
+    } else {
+      console.log(`VLC> ${stdout}`);
+    }
+
+  });
+}
 
 module.exports = {
 
+  init: () => {
+    if (fs.existsSync(socket))
+      fs.unlinkSync(socket);
+
+    const vlc = exec(`vlc -I oldrc --rc-unix ${socket} --rc-fake-tty --no-playlist-autostart`, (err) => {
+      if (err)
+        console.error(`VLC> ERR: ${err}`);
+      vlc();
+    });
+    vlc.on('exit', (code) => {
+      console.warn(`VLC> exited with code: ${code}`);
+    });
+    vlc.stdout.on('data', (data) => {
+      console.log(`VLC> ${data}`);
+    });
+    vlc.stderr.on('data', (data) => {
+      console.log(`VLC> ERR: ${data}`);
+    });
+  },
+
   play: () => {
-    if (playing) {
-      console.log('already playing');
-      return;
-    }
-
-    playing = true;
-    const queued = queue.length;
-    const vlcProcess = child.exec(`vlc "${queue.slice(current).join('", "')}" --play-and-exit`, (err, stdout, stderr) => {
-      if (err) {
-        console.log(err);
-        playing = false;
-        return;
-      }
-
-      current += queued;
-      //console.log('stdout:', stdout);
-      //console.log('stderr:', stderr);
-    });
-
-    vlcProcess.on('exit', (code, signal) => {
-      console.log(`code: ${code}, signal: ${signal}`);
-      playing = false;
-      module.exports.play();
-    });
+    send('play');
   },
 
   pause: () => {
+    send('pause');
+  },
 
+  stop: () => {
+    send('stop');
   },
 
   next: () => {
-
+    send('next');
   },
 
-  queue: (urls) => {
+  prev: () => {
+    send('prev');
+  },
 
-    queue = queue.concat(urls);
-    console.log(queue);
+  queue: (objs) => {
+    if (!objs) {
+      send('playlist', emit.queue);
+      return;
+    }
+    objs.forEach((obj, i) => {
+      setTimeout(() => {
+        send(`enqueue "${path.join(cfg.root, obj.artist, obj.album, obj.song.title)}"`);
+      }, 100 * i);
+    });
+  },
+
+  volume: (keyword) => {
+    if (keyword === 'up') {
+      send('volup 3');
+    } else if (keyword === 'down') {
+      send('voldown 3');
+    } else {
+      send(`volume ${keyword}`);
+    }
+  },
+
+  nowPlaying: () => {
+    send('get_title', (title) => {
+      title.split('\n').forEach(line => {
+        if (!line.startsWith('status change:') && line.trim().length)
+          emit('NOW PLAYING', line);
+      });
+    });
   }
 
 }

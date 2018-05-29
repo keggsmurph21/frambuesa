@@ -1,30 +1,24 @@
 'use strict';
 
 const request = require('request');
-
-const SECRET = process.env.FRAMBUESA_SECRET;
-const HOST = process.env.HOST;
-const PORT = process.env.PORT;
-const URL = `http://${HOST}:${PORT}/bot/process`;
-
-
+const cfg = require('./config');
 
 module.exports = (id, response) => {
 
   const payload = {
-    url: URL,
+    url: cfg.bot_process_url,
     json: {
-      secret: SECRET,
+      secret: cfg.app_secret,
       id: id,
       text: response
     }
   };
+
   request.post(payload, (err, res, body) => {
 
     if (err)
-      console.error(err);
+      console.error(`F> processing ERR: ${err}`);
 
   });
 
-  //console.log('processing');
 }
