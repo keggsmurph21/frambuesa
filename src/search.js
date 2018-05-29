@@ -57,12 +57,12 @@ function regex(string) {
   return new RegExp(`.*${escape(string)}.*`, 'i');
 }
 
-let media = [];
+let files = [];
 find(cfg.root).map(artist => {
   find(path.join(cfg.root, artist)).map(album => {
     find(path.join(cfg.root, artist, album), false).map((song, i) => {
 
-      media.push({
+      files.push({
         artist: artist,
         album: album,
         song: {
@@ -77,27 +77,32 @@ find(cfg.root).map(artist => {
 
 module.exports = (words) => {
 
-  const params = buildQuery(words);
+  const query = buildQuery(words);
 
-  if (!params)
+  if (!query)
     return [];
 
-  if (params.playlist) {
+  if (!query.artist && !query.album && !query.song && !query.playlist) {
+    console.error(`F> search results ERR: insufficient search query`);
+    return [];
+  }
+
+  if (query.playlist) {
 
   } else {
 
-    const filtered = media.filter(medium => {
+    const filtered = files.filter(file => {
 
-      if (params.artist && !escape(medium.artist).match(regex(params.artist)))
+      if (query.artist && !escape(file.artist).match(regex(query.artist)))
         return false;
 
-      if (params.album && !escape(medium.album).match(regex(params.album)))
+      if (query.album && !escape(file.album).match(regex(query.album)))
         return false;
 
-      if (params.song && !escape(medium.song.title).match(regex(params.song)))
+      if (query.song && !escape(file.song.title).match(regex(query.song)))
         return false;
 
-      if (!medium.song.title.match(/(mp3|m4p|ogg|wav|flac|aiff)$/i))
+      if (!file.song.title.match(/(mp3|m4p|ogg|wav|flac|aiff)$/i))
         return false;
 
       return true;
@@ -108,4 +113,4 @@ module.exports = (words) => {
   }
 };
 
-module.exports.media = media;
+module.exports.files = files;

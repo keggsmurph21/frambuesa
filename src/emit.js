@@ -46,12 +46,19 @@ module.exports.searchResults = (results) => {
     return;
   }
 
+  if (results.length > 250) {
+    emit('SEARCH', `too many results (${results.length}) ... try narrowing down your search`);
+    return;
+  }
+
   const chunks = results.map(result => {
     return `|> "${result.song.title}" by "${result.artist}" on "${result.album}"`;
   }).join('\n').match(/(.|[\r\n]){1,900}/g);
 
   chunks.forEach((chunk, i) => {
-    setTimeout(() => { emit(`SEARCH (p. ${i+1}/${chunks.length})`, chunk); }, 1000);
+    if (i > 10)
+      return;
+    setTimeout(() => { emit(`SEARCH (p. ${i+1}/${chunks.length}${chunks.length > 10 ? '+' : ''})`, chunk); }, 1000);
   });
 
 }

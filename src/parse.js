@@ -13,6 +13,8 @@ module.exports = (json) => {
   try {
     messages = JSON.parse(json);
   } catch (e) {
+    if (messages.startsWith('<')) // ignore it b/c it's HTML
+      return;
     console.error(`F> parsing ERROR: unable to parse "${json}" (${e})`);
     return;
   }
@@ -31,10 +33,11 @@ module.exports = (json) => {
 
           if (tokens[1]) {
             const results = search(tokens.slice(1));
-            if (!results.length) {
-              emit.searchResults([]);
+            emit.searchResults(results);
+
+            if (!results.length || results.length > 250)
               break;
-            }
+
             player.queue(results);
           }
           setTimeout(player.play, 1000);
@@ -117,6 +120,14 @@ module.exports = (json) => {
           player.prev();
           break;
 
+        case ('echo'):
+          emit('ECHO', tokens.slice(1).join(' '));
+          break;
+
+        case ('logs'):
+        case ('log'):
+          player.logs();
+          break;
       }
 
       //player.pause();

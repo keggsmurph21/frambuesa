@@ -1,7 +1,7 @@
 'use strict';
 
-const host = process.env.HOST,
-    port = process.env.PORT,
+const host = 'murpus.herokuapp.com',//process.env.HOST,
+    port = 80,//process.env.PORT,
     bot_id = process.env.BOT_ID;
 
 module.exports = {

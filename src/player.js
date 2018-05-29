@@ -26,6 +26,8 @@ function send(message, callback) {
   });
 }
 
+let logs = [];
+
 module.exports = {
 
   init: () => {
@@ -33,18 +35,24 @@ module.exports = {
       fs.unlinkSync(socket);
 
     const vlc = exec(`vlc -I oldrc --rc-unix ${socket} --rc-fake-tty --no-playlist-autostart`, (err) => {
-      if (err)
+      if (err) {
         console.error(`VLC> ERR: ${err}`);
+        emit('ERROR', `VLC error: ${err}`)
+      }
       vlc();
     });
     vlc.on('exit', (code) => {
       console.warn(`VLC> exited with code: ${code}`);
     });
     vlc.stdout.on('data', (data) => {
-      console.log(`VLC> ${data}`);
+      data = `VLC> ${data}`;
+      console.log(data);
+      logs.push(data);
     });
     vlc.stderr.on('data', (data) => {
-      console.log(`VLC> ERR: ${data}`);
+      data = `VLC> ERR: ${data}`;
+      console.log(data);
+      logs.push(data);
     });
   },
 
@@ -97,6 +105,10 @@ module.exports = {
           emit('NOW PLAYING', line);
       });
     });
+  },
+
+  logs: () => {
+    emit('LOGS', logs.slice(-25));
   }
 
 }
